@@ -1,0 +1,9 @@
+Artificial Intelligence (AI) is the simulation of human intelligence in machines that are programmed to think and learn. It is a branch of computer science dealing with the creation of smart machines capable of performing tasks that typically require human intelligence.
+
+There are two types of AI: narrow AI and general AI. Narrow AI is designed for a specific task, like voice assistants or recommendation systems. General AI, which remains theoretical, would outperform humans at nearly every cognitive task.
+
+Machine Learning (ML) is a subset of AI focused on the development of systems that learn from data. These systems improve their performance over time without being explicitly programmed for each task.
+
+Deep learning, a subfield of machine learning, uses neural networks with many layers. It has been responsible for major advances in areas such as image recognition, natural language processing, and game playing.
+
+The ethical implications of AI include privacy concerns, job displacement, and decision-making transparency. As AI continues to evolve, it is critical to develop policies that guide its development and deployment responsibly.
