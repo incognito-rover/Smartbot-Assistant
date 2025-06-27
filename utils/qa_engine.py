@@ -1,30 +1,44 @@
-from sentence_transformers import SentenceTransformer
-import faiss
-import numpy as np
+# utils/qa_engine.py
 
-# Load embedding model
-model = SentenceTransformer("all-MiniLM-L6-v2")
+import re
 
-# STEP 3: Chunk the document
-def chunk_text(text, chunk_size=300):
-    words = text.split()
-    return [" ".join(words[i:i+chunk_size]) for i in range(0, len(words), chunk_size)]
+def find_relevant_context(question, document, top_n=3):
+    """Find the top-N relevant sentences from the document based on word overlap."""
+    question_words = set([
+        word.lower() for word in question.split()
+        if len(word) > 3
+    ])
 
-# STEP 3: Embed document chunks
-def embed_chunks(chunks):
-    embeddings = model.encode(chunks)
-    index = faiss.IndexFlatL2(embeddings.shape[1])
-    index.add(np.array(embeddings))
-    return index, embeddings, chunks
+    sentences = re.split(r'[.!?]', document)
+    scored = []
 
-# STEP 4: Get relevant chunk based on user question
-def get_relevant_chunk(question, index, embeddings, chunks, top_k=1):
-    q_embed = model.encode([question])
-    D, I = index.search(np.array(q_embed), top_k)
-    return chunks[I[0][0]]
+    for sentence in sentences:
+        clean_sentence = sentence.strip()
+        if len(clean_sentence) < 20:
+            continue
 
-# STEP 4: Answer the question using context
-def answer_question(question, context):
-    # You can later plug in GPT, Claude, or LLaMA here
-    answer = f"[Answer based on context]\n\n{context}\n\nQ: {question}\nA: [Your model's answer here]"
-    return answer
+        score = sum(1 for word in question_words if word in clean_sentence.lower())
+        if score > 0:
+            scored.append((clean_sentence, score))
+
+    # Sort by relevance
+    top_sentences = sorted(scored, key=lambda x: x[1], reverse=True)[:top_n]
+    return [s[0] for s in top_sentences]
+
+
+def generate_answer(question, context_list):
+    """Generate a basic answer by selecting and formatting from context."""
+    if not context_list:
+        return "❌ I couldn't find a relevant answer in the document."
+
+    question_lower = question.lower()
+    base = "Based on the document: "
+
+    if any(q in question_lower for q in ["what is", "define", "explain"]):
+        return base + context_list[0]
+    elif any(q in question_lower for q in ["why", "how"]):
+        return base + " ".join(context_list[:2])
+    elif any(q in question_lower for q in ["who", "when", "where"]):
+        return base + context_list[0]
+    else:
+        return base + context_list[0]

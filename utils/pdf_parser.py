@@ -1,12 +1,14 @@
+# utils/pdf_parser.py
+
 import fitz  # PyMuPDF
 
 def extract_text_from_pdf(pdf_path):
-    doc = fitz.open(pdf_path)
+    """Extract text content from all pages of a PDF."""
     text = ""
-    for page in doc:
-        text += page.get_text()
+    try:
+        with fitz.open(pdf_path) as doc:
+            for page in doc:
+                text += page.get_text()
+    except Exception as e:
+        print(f"[ERROR] PDF Parsing failed: {e}")
     return text
-
-def extract_text_from_txt(txt_path):
-    with open(txt_path, "r", encoding="utf-8") as f:
-        return f.read()
